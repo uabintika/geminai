@@ -123,7 +123,7 @@ def answer_question(question: str) -> str:
 
 # Main function
 def main():
-    print("Sveiki! Įveskite klausimą. Norėdami išeiti, rašykite 'bye'.")
+    print("Sveiki! Įveskite klausimą. Norėdami išeiti, rašykite 'bye', 'exit' arba 'quit'.")
     print("Norėdami sužinoti orų informaciją - parašykite 'oras'")
     while True:
         question = input("Klausimas: ").strip()
