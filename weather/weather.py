@@ -1,8 +1,14 @@
+import sys
 import os
 from dotenv import load_dotenv
 from openai import OpenAI
 from pydantic import BaseModel
 import requests
+
+# Getting global functions
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from general_functions.global_exit_function import exit_function
+# End of getting global functions
 
 load_dotenv()
 
@@ -121,7 +127,7 @@ def main():
     print("Norėdami sužinoti orų informaciją - parašykite 'oras'")
     while True:
         question = input("Klausimas: ").strip()
-        if question.lower() == "bye":
+        if exit_function(question):
             print("Iki pasimatymo!")
             break
 
