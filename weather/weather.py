@@ -82,9 +82,9 @@ def get_weather(location: str):
             return f"Klaida: {data.get('message', ' - nežinoma klaida')}"
         
         weather_summary = data["weather"][0]["description"]
-        actual_temperature = data["main"]["temp"]
-        feels_like = data["main"]["feels_like"]
-        wind_speed = data["wind"]["speed"]
+        actual_temperature = round(data["main"]["temp"])
+        feels_like = round(data["main"]["feels_like"])
+        wind_speed = round(data["wind"]["speed"])
 
         return f"Orų informacija - {location}: {weather_summary}, {actual_temperature} laipsnių (jutiminė temperatūra - {feels_like} laipsnių). Vėjo greitis: {wind_speed} m/s."
     except Exception as e:
