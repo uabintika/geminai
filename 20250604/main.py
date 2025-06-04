@@ -30,17 +30,6 @@ def read_from_memory() -> str:
         content = f.read().strip()
     return content or "Memory is empty."
 
-def handle_function_call(name: str, args: dict) -> str:
-    if name == "write_to_memory":
-        return write_to_memory(args.get("content", ""))
-    elif name == "read_from_memory":
-        return read_from_memory()
-    elif name == "get_kursenai_info":
-        return get_kursenai_info()
-    elif name == "search_web":
-        return search_web(args.get("query", ""))
-    return "Unknown function."
-
 def get_kursenai_info() -> str:
     response = requests.get(
         "https://en.wikipedia.org/w/api.php",
@@ -65,6 +54,17 @@ def search_web(query: str) -> str:
         for r in results:
             output.append(f"- {r['title']}: {r['href']}")
         return "Top web results:\n" + "\n".join(output) if output else "No results found."
+    
+def handle_function_call(name: str, args: dict) -> str:
+    if name == "write_to_memory":
+        return write_to_memory(args.get("content", ""))
+    elif name == "read_from_memory":
+        return read_from_memory()
+    elif name == "get_kursenai_info":
+        return get_kursenai_info()
+    elif name == "search_web":
+        return search_web(args.get("query", ""))
+    return "Unknown function."
 
 # Tools
 tools = [
