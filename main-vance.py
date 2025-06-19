@@ -65,9 +65,6 @@ if uploaded_file is not None:
         data={"api_token": vance_api_key}
     )
 
-    print(upload_response.status_code)
-    print(upload_response.text)
-
     if upload_response.status_code == 200:
         upload_result = upload_response.json()
         if upload_result.get("code") == 200:
@@ -79,7 +76,7 @@ if uploaded_file is not None:
                 "config": {
                     "module": "img2anime",
                     "module_params": {
-                        "model_name": style,
+                        "model_name": style,  # Use selected style dynamically
                         "prompt": "",
                         "overwrite": False,
                         "denoising_strength": 0.75
@@ -109,13 +106,13 @@ if uploaded_file is not None:
                     trans_id = process_result["data"]["trans_id"]
                     st.write(f"Processing started (Transaction ID: {trans_id})")
 
+                    # Poll for status
                     for attempt in range(30):
                         time.sleep(6)
                         status_response = requests.get(
-                            "https://api-service.vanceai.com/web_api/v1/result",
+                            "https://api-service.vanceai.com/web_api/v1/progress",
                             params={"api_token": vance_api_key, "trans_id": trans_id}
                         )
-
                         st.write(f"Attempt {attempt + 1}: HTTP {status_response.status_code}")
 
                         if status_response.status_code == 200:
@@ -123,9 +120,24 @@ if uploaded_file is not None:
                             if status_data.get("code") == 200:
                                 status = status_data["data"]["status"]
                                 st.write(f"Status: {status}")
-                                if status == "finished":
-                                    final_image_url = status_data["data"]["image_url"]
-                                    st.image(final_image_url, caption="Here is your Disney version!")
+
+                                if status == "finish" or status == "finished":
+                                    st.write("Processing finished. Downloading image...")
+
+                                    # Download the processed image from the /download endpoint
+                                    download_url = f"https://api-service.vanceai.com/web_api/v1/download?trans_id={trans_id}&api_token={vance_api_key}"
+                                    download_response = requests.get(download_url, stream=True)
+
+                                    if download_response.status_code == 200:
+                                        output_path = "output_disney_image.jpg"
+                                        with open(output_path, "wb") as f:
+                                            for chunk in download_response.iter_content(chunk_size=8192):
+                                                if chunk:
+                                                    f.write(chunk)
+                                        st.image(output_path, caption="Here is your Disney version!")
+                                    else:
+                                        st.error(f"Failed to download the processed image. HTTP {download_response.status_code}")
+
                                     break
                                 elif status == "failed":
                                     st.error("Image processing failed.")
@@ -133,7 +145,7 @@ if uploaded_file is not None:
                                 else:
                                     st.write("Processing... please wait.")
                             else:
-                                st.error(f"Error: {status_data.get('message')}")
+                                st.error(f"Error from API: {status_data.get('message')}")
                                 break
                         else:
                             st.error("Failed to get processing status.")
@@ -148,4 +160,3 @@ if uploaded_file is not None:
             st.error(f"Image upload error: {upload_result.get('message', 'Unknown error')}")
     else:
         st.error("Image upload failed.")
-
