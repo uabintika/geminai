@@ -129,18 +129,28 @@ if uploaded_file is not None:
                                     download_response = requests.get(download_url, stream=True)
 
                                     if download_response.status_code == 200:
-                                        output_path = "output_disney_image.jpg"
+                                        # Directory where images will be saved
+                                        output_dir = "."
+                                        # Find all files named like numbers with .jpg extension
+                                        existing_files = [f for f in os.listdir(output_dir) if f.endswith(".jpg") and f[:-4].isdigit()]
+                                        existing_numbers = [int(f[:-4]) for f in existing_files] if existing_files else []
+                                        next_number = max(existing_numbers) + 1 if existing_numbers else 1
+
+                                        output_path = f"{next_number}.jpg"
                                         with open(output_path, "wb") as f:
                                             for chunk in download_response.iter_content(chunk_size=8192):
                                                 if chunk:
                                                     f.write(chunk)
-                                        st.image(output_path, caption="Here is your Disney version!")
+                                        st.image(output_path, caption=f"Here is your Disney version #{next_number}!")
                                     else:
                                         st.error(f"Failed to download the processed image. HTTP {download_response.status_code}")
-
                                     break
                                 elif status == "failed":
                                     st.error("Image processing failed.")
+                                    break
+                                elif status == "fatal":
+                                    st.error("Processing failed with fatal error.")
+                                    st.json(status_data)
                                     break
                                 else:
                                     st.write("Processing... please wait.")
